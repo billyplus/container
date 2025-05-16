@@ -194,7 +194,7 @@ func (wh *TimeWheelMilliSecond) expand() {
 	l := len(wh.tasks)
 	lst := make([]wheelTask, 2*l)
 	copy(lst, wh.tasks)
-	lst = lst[:l]
+	// lst = lst[:l]
 	wh.tasks = lst
 	wh.available = container.NewStackWithCap[int](2 * l)
 	for i := l; i < 2*l; i++ {
