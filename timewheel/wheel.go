@@ -202,6 +202,10 @@ func (wh *TimeWheelMilliSecond) expand() {
 	}
 }
 
+func (wh *TimeWheelMilliSecond) IsEmpty() bool {
+	return atomic.LoadInt32(&wh.taskCount) == 0
+}
+
 // Update move time tick forward. and handle task in current ms list
 func (wh *TimeWheelMilliSecond) Update(ms int64) {
 	if wh == nil {
