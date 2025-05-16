@@ -16,15 +16,16 @@ func TestTimeWheelMs(t *testing.T) {
 	// nowMs += 32 * 60 * 1000
 	// wheel.Update(nowMs)
 	delaymap := map[int64]int{
-		29:   2,
-		49:   2,
-		50:   3,
-		51:   2,
-		59:   3,
-		200:  2,
-		300:  1,
-		1100: 1,
-		4210: 2,
+		29:            2,
+		49:            2,
+		50:            3,
+		51:            2,
+		59:            3,
+		200:           2,
+		300:           1,
+		1100:          1,
+		4210:          2,
+		5 * 60 * 1000: 2,
 	}
 
 	for _, ms := range mslist {
@@ -57,7 +58,7 @@ func checkHand(hand int64, hh, mm, ss, ms int32) bool {
 	return int32(hand>>32) == hh && int32(hand>>24&0xff) == mm && int32(hand>>16&0xff) == ss && int32(hand>>8&0xff) == ms
 }
 
-func addTestCase(wheel *TimeWheel, t *testing.T, startTime, delay int64, result *map[int64]int) {
+func addTestCase(wheel *TimeWheelMilliSecond, t *testing.T, startTime, delay int64, result *map[int64]int) {
 	tickTime := startTime + delay
 	wheel.Insert(tickTime, func(ms int64) {
 		fmt.Println("trigger", ms, delay)
