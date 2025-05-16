@@ -55,6 +55,71 @@ func TestTimeWheelMs(t *testing.T) {
 	}
 }
 
+func TestTimeWheelMsConcurrent(t *testing.T) {
+	mslist := []int64{172223430, 172223436, 172223440, 172223441, 172223439, 1747312310251, time.Now().UnixMilli()}
+	// mslist := []int64{1747321355416}
+	// wheel.hand = mili
+	// wheel.Update(nowMs)
+	// nowMs += 32 * 60 * 1000
+	// wheel.Update(nowMs)
+	delaymap := map[int64]int{
+		3:             2,
+		29:            2,
+		500:           12,
+		49:            2,
+		2220:          22,
+		50:            3,
+		14210:         8,
+		51:            2,
+		19010:         6,
+		59:            3,
+		200:           2,
+		300:           1,
+		1100:          1,
+		3223:          64,
+		4210:          2,
+		220:           21,
+		3220:          20,
+		59010:         2,
+		5 * 60 * 1000: 2,
+	}
+
+	for _, ms := range mslist {
+		result := make(map[int64]int)
+		wheel := NewTimeWheelMilliSecond()
+		maxDelay := int64(0)
+		go func() {
+			for delay, count := range delaymap {
+				if maxDelay < delay {
+					maxDelay = delay
+				}
+				for range count {
+					go func() {
+						addTestCase(wheel, t, ms, delay, &result)
+					}()
+				}
+			}
+		}()
+		nowMs := ms
+		wheel.Update(nowMs)
+		time.Sleep(1 * time.Millisecond)
+		for {
+			if wheel.IsEmpty() {
+				break
+			}
+			nowMs += 3
+			wheel.Update(nowMs)
+		}
+		// for range maxDelay/3 + 5 {
+		// 	nowMs += 3
+		// 	wheel.Update(nowMs)
+		// }
+		for delay, count := range delaymap {
+			assert.Equalf(t, count, result[delay], "ms %d delay %d should excute %d times", ms, delay, count)
+		}
+	}
+}
+
 func checkHand(hand int64, hh, mm, ss, ms int32) bool {
 	fmt.Println("actual ", int32(hand>>32), int32(hand>>24&0xff), int32(hand>>16&0xff), int32(hand>>8&0xff))
 	fmt.Println("expect ", hh, mm, ss, ms)
