@@ -119,3 +119,31 @@ func (st *suiteRingBuffMIMO) TestLfQueueConsistency() {
 		}
 	}
 }
+
+func (st *suiteRingBuffMIMO) TestFuncBuff() {
+	buff := NewRingBuffMIMO[func()](10)
+	for i := 0; i < 10240; i++ {
+		go func() {
+			for {
+				fn, ok := buff.Pop()
+				if !ok {
+					st.Nil(fn, "fn should be nil")
+					runtime.Gosched()
+				} else {
+					st.NotNil(fn, "fn should not be nil")
+				}
+				// if fn != nil {
+				// 	fmt.Println("1111", ok)
+				// } else {
+				// 	fmt.Println("2222", ok)
+				// }
+			}
+		}()
+	}
+
+	for i := 0; i < 100; i++ {
+		buff.Push(func() {
+			fmt.Println(11111)
+		})
+	}
+}
