@@ -58,11 +58,12 @@ func (q *RingBuffMIMO[T]) IsFull() bool {
 
 // 弹出最前面的一个
 func (q *RingBuffMIMO[T]) Pop() (T, bool) {
+	q.mut.Lock()
+	defer q.mut.Unlock()
+
 	if q.Empty() {
 		return q.zeroV, false
 	}
-	q.mut.Lock()
-	defer q.mut.Unlock()
 
 	q.head = (q.head + 1) % q.cap
 	v := q.buff[q.head]
