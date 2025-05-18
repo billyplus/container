@@ -40,8 +40,8 @@ func (q *RingBuffMIMO[T]) Push(val T) {
 		q.tail = q.cap
 		q.cap = int32(len(buf))
 	}
-	atomic.AddInt32(&q.len, 1)
 	q.buff[q.tail] = val
+	atomic.AddInt32(&q.len, 1)
 }
 
 func (q *RingBuffMIMO[T]) Len() int32 {
@@ -58,16 +58,16 @@ func (q *RingBuffMIMO[T]) IsFull() bool {
 
 // 弹出最前面的一个
 func (q *RingBuffMIMO[T]) Pop() (T, bool) {
-	q.mut.Lock()
-	defer q.mut.Unlock()
-
 	if q.Empty() {
 		return q.zeroV, false
 	}
+	atomic.AddInt32(&q.len, -1)
+
+	q.mut.Lock()
+	defer q.mut.Unlock()
 
 	q.head = (q.head + 1) % q.cap
 	v := q.buff[q.head]
 	q.buff[q.head] = q.zeroV
-	atomic.AddInt32(&q.len, -1)
 	return v, true
 }
