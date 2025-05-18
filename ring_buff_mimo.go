@@ -38,7 +38,7 @@ func (q *RingBuffMIMO[T]) Push(val T) {
 		q.buff = buf
 		q.head = 0
 		q.tail = q.cap
-		q.cap = int32(len(buf))
+		atomic.StoreInt32(&q.cap, int32(len(buf)))
 	}
 	q.buff[q.tail] = val
 	atomic.AddInt32(&q.len, 1)
